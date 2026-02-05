@@ -10,47 +10,20 @@ namespace SkipSplashScreens.Patches
     internal class SkipSplashScreensPatch
     {
         [HarmonyPatch(typeof(BootManager))]
-        [HarmonyPatch(nameof(BootManager.changeState))]
+        [HarmonyPatch(nameof(BootManager.Initialize))]
         [HarmonyPostfix]
-        private static void BootManager_changeState_Postfix(BootManager __instance)
+#if TDMX_MONO
+        private static void BootManager_Initialize_Postfix(BootManager __instance, ref BootManager.BootState ___m_stateBoot)
+#else
+        private static void BootManager_Initialize_Postfix(BootManager __instance)
+#endif
         {
-            __instance.m_fadeInSpeed = 1;
-            __instance.m_fadeInSpeed = 1;
-        }
-
-        [HarmonyPatch(typeof(BootManager))]
-        [HarmonyPatch(nameof(BootManager.updateSetFullScreen))]
-        [HarmonyPrefix]
-        private static void BootManager_updateSetFullScreen_Prefix(BootManager __instance)
-        {
-            __instance.changeState(BootManager.BootState.Logo, BootManager.BootState.Init);
-        }
-
-        [HarmonyPatch(typeof(BootManager))]
-        [HarmonyPatch(nameof(BootManager.updateLogo))]
-        [HarmonyPrefix]
-        private static void BootManager_updateLogo_Prefix(BootManager __instance)
-        {
-            __instance.m_bSkip = true;
-            __instance.changeState(BootManager.BootState.LogoCRI, BootManager.BootState.Logo);
-        }
-
-        [HarmonyPatch(typeof(BootManager))]
-        [HarmonyPatch(nameof(BootManager.updateLogoCRI))]
-        [HarmonyPrefix]
-        private static void BootManager_updateLogoCRI_Prefix(BootManager __instance)
-        {
-            __instance.m_bSkip = true;
-            __instance.changeState(BootManager.BootState.AutoSaveHeadsUp, BootManager.BootState.LogoCRI);
-        }
-
-        [HarmonyPatch(typeof(BootManager))]
-        [HarmonyPatch(nameof(BootManager.updateAutoSaveHeadsUp))]
-        [HarmonyPrefix]
-        private static void BootManager_updateAutoSaveHeadsUp_Prefix(BootManager __instance)
-        {
-            __instance.m_bSkip = true;
-            __instance.changeState(BootManager.BootState.End, BootManager.BootState.AutoSaveHeadsUp);
+#if TDMX_MONO
+            ___m_stateBoot = BootManager.BootState.End;
+#else
+            BootManager.m_stateBoot = BootManager.BootState.End;
+#endif
+            TaikoSingletonMonoBehaviour<CommonObjects>.Instance.MySceneManager.ChangeScene("Title", false);
         }
     }
 }
